@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 Spelling Bee - Searchable List</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 20px; 
+            background-color: #f8fafc; 
+            color: #334155; 
+            margin-top: 130px; /* Increased space for the larger header */
+        }
+
+        /* FIXED HEADER */
+        #header {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            background: #1e293b;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        h1 { margin: 0 0 10px 0; font-size: 1.4rem; letter-spacing: 1px; }
+
+        /* SEARCH BAR */
+        .search-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        #wordSearch {
+            width: 100%;
+            padding: 10px 15px;
+            border-radius: 25px;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* LIST LAYOUT */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            min-height: 100px;
+        }
+
+        .word-row {
+            display: grid;
+            grid-template-columns: 50px 50px 1fr 50px;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            transition: background 0.2s;
+        }
+
+        .word-row:hover { background-color: #f1f5f9; }
+        .word-row.hidden { display: none; }
+
+        .num { color: #94a3b8; font-size: 0.9rem; font-weight: bold; }
+        
+        .word-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1e293b;
+            text-transform: capitalize;
+        }
+
+        /* BUTTONS */
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.3rem;
+            padding: 5px;
+            transition: transform 0.1s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .icon-btn:hover { transform: scale(1.2); }
+        .audio-icon { color: #6366f1; }
+        .def-icon { color: #14b8a6; }
+
+        #noResults {
+            padding: 40px;
+            text-align: center;
+            color: #94a3b8;
+            font-style: italic;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="header">
+        <h1>2026 Word Master List</h1>
+        <div class="search-container">
+            <input type="text" id="wordSearch" placeholder="🔍 Search for a word..." onkeyup="filterWords()">
+        </div>
+    </div>
+
+    <div class="container" id="list">
+        </div>
+    <div id="noResults" class="hidden">No words found match your search.</div>
+
+    <script>
+        const dictionary = {
+            "send": "To cause to go or be taken to a particular destination.",
+            "stuck": "Unable to move from a particular position or place.",
+            "fish": "A limbless cold-blooded vertebrate animal with gills and fins.",
+            "mind": "The element of a person that enables them to be aware of the world.",
+            "scrub": "Rub hard so as to clean.",
+            "brown": "A color produced by mixing red, yellow, and black.",
+            "tint": "A slight or pale coloration; a shade.",
+            "yawn": "Involuntarily open one's mouth wide and inhale deeply due to tiredness.",
+            "want": "Have a desire to possess or do something.",
+            "pond": "A small body of still water formed naturally or by hollowing.",
+            "sharks": "A long-bodied marine fish with a cartilaginous skeleton and prominent dorsal fin.",
+            "twigs": "A slender woody shoot growing from a branch or stem of a tree.",
+            "comfy": "Comfortable.",
+            "tight": "Fixed, fastened, or closed firmly; hard to move.",
+            "scrunch": "Make a loud crunching noise, or crush something into a compact mass.",
+            "close": "Only a short distance away or apart in space or time.",
+            "wire": "Metal drawn out into the form of a thin flexible thread or rod.",
+            "giant": "An imaginary or mythical being of human form but superhuman size.",
+            "chance": "A possibility of something happening.",
+            "tender": "Showing gentleness and concern or sympathy.",
+            "melon": "The large round fruit of a plant of the gourd family, with sweet pulpy flesh.",
+            "parent": "A father or mother.",
+            "hockey": "A game played on ice or a field where teams use sticks to hit a puck or ball.",
+            "insects": "Small arthropod animals that have six legs and generally one or two pairs of wings.",
+            "shortcut": "An alternative route that is shorter than the one usually taken.",
+            "lure": "Tempt to do something or to go somewhere, especially by offering some form of reward.",
+            "forest": "A large area covered chiefly with trees and undergrowth.",
+            "spinning": "Turning around and around quickly.",
+            "sizzling": "Very hot; making a hissing sound.",
+            "search": "Try to find something by looking or otherwise seeking carefully and thoroughly.",
+            "mango": "A fleshy yellowish-red tropical fruit that is eaten ripe or used green for pickles.",
+            "jangle": "Make or cause to make a ringing metallic sound, typically a discordant one.",
+            "blossoms": "A flower or a mass of flowers on a tree or bush.",
+            "studded": "Decorated or augmented with surface projections like studs.",
+            "distress": "Extreme anxiety, sorrow, or pain.",
+            "moment": "A very brief period of time.",
+            "basil": "An aromatic annual herb of the mint family, native to tropical Asia.",
+            "satin": "A smooth, glossy fabric, typically of silk, produced by a weave.",
+            "signal": "A gesture, action, or sound that is used to convey information or instructions.",
+            "shuffle": "Walk by dragging one's feet along or without lifting them fully from the ground.",
+            "minnows": "A small freshwater fish of the carp family.",
+            "before": "During the period of time preceding a particular event or time.",
+            "writing": "The activity or skill of marking coherent words on paper and composing text.",
+            "sugar": "A sweet crystalline substance obtained from various plants, like sugar cane.",
+            "seep": "Flow or leak slowly through porous material or small holes.",
+            "wheels": "Circular objects that revolve on an axle and are fixed below a vehicle.",
+            "fruit": "The sweet and fleshy product of a tree or other plant that contains seed.",
+            "goats": "Hardy domesticated ruminant animals that have backward-curving horns.",
+            "limbs": "An arm or leg of a person or four-legged animal, or a bird's wing.",
+            "señor": "A Spanish title or form of address used to or of a man.",
+            "faraway": "Distant in space or time.",
+            "pirates": "People who attack and rob ships at sea.",
+            "wooden": "Made of wood.",
+            "breakfast": "The first meal of the day.",
+            "acrobat": "An entertainer who performs spectacular gymnastic feats.",
+            "chocolate": "A food preparation in the form of a paste or solid block made from cacao seeds.",
+            "elephant": "A very large plant-eating mammal with a trunk, tusks, and large ears.",
+            "recipe": "A set of instructions for preparing a particular dish.",
+            "surprise": "An unexpected or astonishing event, fact, or thing.",
+            "bombarded": "Attack continuously with bombs, shells, or other missiles.",
+            "incredible": "Impossible to believe.",
+            "countess": "A woman holding the rank of count or earl.",
+            "peppercorn": "The dried berry of a pepper plant.",
+            "raise": "Lift or move to a higher position or level.",
+            "zooming": "Moving or traveling very quickly.",
+            "turnout": "The number of people attending or taking part in an event.",
+            "streetlights": "Lights illuminating a road or street from a tall post.",
+            "courtyard": "An unroofed area that is completely or partially enclosed by walls or buildings.",
+            "asleep": "In a state of sleep.",
+            "dinosaur": "A fossil reptile of the Mesozoic era, often of enormous size.",
+            "vacuum": "A space entirely devoid of matter.",
+            "monsoon": "A seasonal prevailing wind in South/Southeast Asia.",
+            "avocado": "A pear-shaped fruit with a rough leathery skin and smooth oily edible flesh.",
+            "February": "The second month of the year.",
+            "especially": "Used to single out one person, thing, or situation over all others.",
+            "scorcher": "A very hot day.",
+            "fragments": "Small parts broken or separated off something.",
+            "unleash": "Release from a leash or restraint.",
+            "cosmetics": "Products applied to the body, especially the face, to improve appearance.",
+            "frustration": "The feeling of being upset or annoyed as a result of being unable to change something.",
+            "mascot": "A person or thing that is supposed to bring good luck or that is used as a symbol.",
+            "mustache": "A strip of hair left to grow above the upper lip.",
+            "perfume": "A fragrant liquid typically made from essential oils extracted from flowers.",
+            "tuxedo": "A man's dinner jacket.",
+            "lurches": "Makes an abrupt, unsteady, uncontrolled movement or series of movements.",
+            "prognosis": "The likely course of a disease or situation.",
+            "sequins": "Small, shiny disks sewn as decoration onto clothing.",
+            "fabulous": "Extraordinary, especially extraordinarily good.",
+            "fluently": "With an ability to express oneself easily and articulately.",
+            "brandished": "Wave or flourish (something, especially a weapon) as a threat or in anger.",
+            "anguish": "Severe mental or physical pain or suffering.",
+            "rickety": "A structure or piece of equipment poorly made and likely to collapse.",
+            "pediatric": "Relating to the branch of medicine dealing with children and their diseases.",
+            "democracy": "A system of government by the whole population through elected representatives.",
+            "beige": "A pale sandy yellowish-brown color.",
+            "grimace": "An ugly, twisted expression on a person's face, typically expressing pain or disgust.",
+            "enormous": "Very large in size, quantity, or extent.",
+            "nautical": "Of or concerning sailors or navigation; maritime.",
+            "ebony": "Heavy blackish or very dark brown timber from a mainly tropical tree.",
+            "paltry": "Small or meager amount.",
+            "garbled": "Sound or message reproduced in a confused or distorted way.",
+            "imitation": "A thing intended to simulate or copy something else.",
+            "receptionist": "A person employed to greet and assist visitors in an office.",
+            "plausible": "Seeming reasonable or probable.",
+            "commotion": "A state of confused and noisy disturbance.",
+            "immigrants": "People who come to live permanently in a foreign country.",
+            "spectators": "People who watch at a show, game, or other event.",
+            "suspicious": "Having or showing a cautious distrust of someone or something.",
+            "ramshackle": "In a state of severe disrepair.",
+            "heron": "A large fish-eating wading bird with long legs, a long S-shaped neck, and a long pointed bill.",
+            "nomad": "A member of a people having no permanent abode, who travel from place to place.",
+            "skewer": "A long piece of wood or metal used for holding pieces of food together during cooking.",
+            "lunacy": "Extreme folly or eccentricity; insanity.",
+            "bracken": "A tall fern with coarse lobed fronds which occurs worldwide and can cover large areas.",
+            "neon": "A fluorescent lighting or a gas that glows when electricity passes through.",
+            "hypnosis": "The state of consciousness in which a person apparently loses the power of voluntary action.",
+            "gusto": "Enjoyment or vigor in doing something; zest.",
+            "gleaned": "Extract (information) from various sources.",
+            "winsome": "Attractive or appealing in appearance or character.",
+            "galore": "In abundance.",
+            "atrium": "An open-roofed entrance hall or central court.",
+            "savant": "A learned person, especially a distinguished scientist.",
+            "hippies": "A person of unconventional appearance, typically having long hair and wearing beads.",
+            "campaign": "An organized course of action to achieve a particular goal.",
+            "mosque": "A Muslim place of worship.",
+            "warlock": "A man who practices witchcraft; a sorcerer.",
+            "convulsively": "In a way that involves sudden, violent, irregular movement.",
+            "garishly": "In a way that is obtrusively bright and showy.",
+            "Everest": "The highest mountain in the world, in the Himalayas.",
+            "cavorting": "Jump or dance around excitedly.",
+            "conscience": "An inner feeling or voice viewed as acting as a guide to the rightness or wrongness of one's behavior.",
+            "deferential": "Showing humble submission and respect.",
+            "khaki": "A textile fabric of a dull brownish-yellow color.",
+            "asphalt": "A dark tar-like mixture used for surfacing roads.",
+            "talcum": "A toilet powder made of purified talc and usually scented.",
+            "equestrian": "Relating to horse riding.",
+            "monsieur": "A title or form of address used of or to a French-speaking man.",
+            "prestigious": "Inspiring respect and admiration; having high status.",
+            "guttural": "Produced in the throat; harsh-sounding.",
+            "courier": "A company or person who carries and delivers documents and parcels.",
+            "psyche": "The human soul, mind, or spirit.",
+            "Frankenstein": "A thing that becomes terrifying or destructive to its maker.",
+            "et cetera": "Used to indicate that more of the same kind of thing could be mentioned.",
+            "delphine": "Relating to or resembling a dolphin.",
+            "archipelago": "A group of islands.",
+            "puissance": "Great power, influence, or prowess.",
+            "chignon": "A knot or coil of hair arranged on the back of a woman's head.",
+            "galleon": "A sailing ship in use from the 15th through 17th centuries, originally as a warship.",
+            "chartreuse": "A pale yellow or pale green color.",
+            "Nehru": "Refers to a style of jacket with a high collar (after Jawaharlal Nehru).",
+            "swaggering": "Walking or behaving in a very confident and typically arrogant or aggressive way.",
+            "riveted": "Fascinated or transfixed; also fixed in place with metal fasteners.",
+            "dirge": "A lament for the dead, especially one forming part of a funeral rite.",
+            "whittled": "Carve (wood) into an object by repeatedly cutting small slices from it.",
+            "fiberglass": "A reinforced plastic material composed of glass fibers embedded in a resin matrix.",
+            "fissures": "A long, narrow opening or line of breakage made by cracking or splitting.",
+            "discipline": "The practice of training people to obey rules or a code of behavior.",
+            "scurrying": "Move hurriedly with short quick steps.",
+            "pizzeria": "A place where pizzas are made and sold.",
+            "skittish": "Excitably or easily scared.",
+            "nomination": "The action of nominating or state of being nominated.",
+            "dictatorship": "A government by a dictator.",
+            "sporadic": "Occurring at irregular intervals or only in a few places; scattered.",
+            "repugnant": "Extremely distasteful; unacceptable.",
+            "renowned": "Known or talked about by many people; famous.",
+            "laborious": "Requiring a lot of time, effort, and hard work.",
+            "foreseeable": "Able to be predicted.",
+            "scalpel": "A small and extremely sharp bladed instrument used for surgery.",
+            "compassionate": "Feeling or showing sympathy and concern for others.",
+            "alfalfa": "A leguminous plant with clover-like leaves and bluish-purple flowers.",
+            "crematorium": "A place where a dead person's body is cremated.",
+            "amicable": "Having a spirit of friendliness; without serious disagreement.",
+            "beautician": "A person whose job is to give people beauty treatments.",
+            "assignment": "A task or piece of work assigned to someone as part of a job or course of study.",
+            "whinnying": "The high-pitched sound a horse makes.",
+            "memoirs": "A historical account or biography written from personal knowledge.",
+            "ominous": "Giving the impression that something bad or unpleasant is going to happen.",
+            "syndrome": "A group of symptoms which consistently occur together.",
+            "safari": "An expedition to observe or hunt animals in their natural habitat.",
+            "substantially": "To a great or significant degree.",
+            "formidable": "Inspiring fear or respect through being impressively large, powerful, or intense.",
+            "marquee": "A large tent used for social functions.",
+            "compunction": "A feeling of guilt or moral scruple that prevents or follows the doing of something bad.",
+            "hyperventilated": "Breathe at an abnormally rapid rate.",
+            "onslaught": "A fierce or destructive attack.",
+            "misanthrope": "A person who dislikes humankind and avoids human society.",
+            "cravenly": "In a way that shows a complete lack of courage; cowardly.",
+            "hypocritical": "Behaving in a way that suggests one has higher standards than is the case.",
+            "traumatic": "Deeply disturbing or distressing.",
+            "solemnly": "In a formal and dignified manner.",
+            "contentious": "Causing or likely to cause an argument; controversial.",
+            "ensemble": "A group of musicians, actors, or dancers who perform together.",
+            "lye": "A strongly alkaline solution, especially of potassium hydroxide.",
+            "lacrosse": "A team game using a long-handled stick with a net.",
+            "cajolery": "Coaxing or flattery intended
