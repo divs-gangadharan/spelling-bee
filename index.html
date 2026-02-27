@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 Spelling Bee - Searchable List</title>
+    <title>2026 Spelling Bee - Progress Tracker</title>
     <style>
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             padding: 20px; 
             background-color: #f8fafc; 
             color: #334155; 
-            margin-top: 130px; /* Increased space for the larger header */
+            margin-top: 80px; 
         }
 
         /* FIXED HEADER */
@@ -24,23 +24,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             z-index: 1000;
         }
-        h1 { margin: 0 0 10px 0; font-size: 1.4rem; letter-spacing: 1px; }
-
-        /* SEARCH BAR */
-        .search-container {
-            max-width: 400px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        #wordSearch {
-            width: 100%;
-            padding: 10px 15px;
-            border-radius: 25px;
-            border: none;
-            outline: none;
-            font-size: 1rem;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-        }
+        h1 { margin: 0; font-size: 1.4rem; letter-spacing: 1px; }
 
         /* LIST LAYOUT */
         .container {
@@ -50,20 +34,30 @@
             border-radius: 12px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            min-height: 100px;
         }
 
         .word-row {
             display: grid;
-            grid-template-columns: 50px 50px 1fr 50px;
+            grid-template-columns: 40px 40px 50px 1fr 50px;
             align-items: center;
             padding: 12px 20px;
             border-bottom: 1px solid #e2e8f0;
-            transition: background 0.2s;
+            transition: all 0.2s;
         }
 
         .word-row:hover { background-color: #f1f5f9; }
-        .word-row.hidden { display: none; }
+        .word-row:last-child { border-bottom: none; }
+
+        /* CHECKED STATE STYLING */
+        .word-row.completed {
+            background-color: #f8fafc;
+            opacity: 0.5;
+        }
+        .word-row.completed .word-text, 
+        .word-row.completed .num {
+            text-decoration: line-through;
+            color: #94a3b8;
+        }
 
         .num { color: #94a3b8; font-size: 0.9rem; font-weight: bold; }
         
@@ -72,6 +66,13 @@
             font-weight: 600;
             color: #1e293b;
             text-transform: capitalize;
+        }
+
+        /* CHECKBOX */
+        .check-box {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
         }
 
         /* BUTTONS */
@@ -91,27 +92,16 @@
         .audio-icon { color: #6366f1; }
         .def-icon { color: #14b8a6; }
 
-        #noResults {
-            padding: 40px;
-            text-align: center;
-            color: #94a3b8;
-            font-style: italic;
-        }
-
     </style>
 </head>
 <body>
 
     <div id="header">
         <h1>2026 Word Master List</h1>
-        <div class="search-container">
-            <input type="text" id="wordSearch" placeholder="🔍 Search for a word..." onkeyup="filterWords()">
-        </div>
     </div>
 
     <div class="container" id="list">
         </div>
-    <div id="noResults" class="hidden">No words found match your search.</div>
 
     <script>
         const dictionary = {
@@ -309,4 +299,277 @@
             "ensemble": "A group of musicians, actors, or dancers who perform together.",
             "lye": "A strongly alkaline solution, especially of potassium hydroxide.",
             "lacrosse": "A team game using a long-handled stick with a net.",
-            "cajolery": "Coaxing or flattery intended
+            "cajolery": "Coaxing or flattery intended to persuade someone to do something.",
+            "residuals": "A remaining amount after a process or subtraction.",
+            "peroxide": "Used as an antiseptic or as a bleaching agent.",
+            "apocalypse": "The complete final destruction of the world.",
+            "barricade": "An improvised barrier.",
+            "anonymously": "Without any name acknowledged.",
+            "barrette": "A clip or bar for holding hair in place.",
+            "junket": "An extravagant trip or celebration.",
+            "Erie": "One of the five Great Lakes of North America.",
+            "silhouette": "The dark shape and outline of someone or something against a lighter background.",
+            "thesaurus": "A book that lists words in groups of synonyms.",
+            "chandelier": "A decorative hanging light with branches.",
+            "concierge": "A hotel staff member who helps guests.",
+            "hibiscus": "A plant grown in warm climates for its large brightly colored flowers.",
+            "maracas": "A pair of hollow gourds with beans inside, used as a musical instrument.",
+            "burpees": "A physical exercise.",
+            "piccolo": "A small flute sounding an octave higher.",
+            "tulle": "A soft, fine material like net, used for making veils and dresses.",
+            "camphor": "A white substance with a strong smell used in medicine.",
+            "paparazzi": "Photographers who follow famous people.",
+            "pogrom": "An organized massacre of a particular ethnic group.",
+            "pâtisserie": "A shop where French pastries and cakes are sold.",
+            "sarsaparilla": "A carbonated soft drink.",
+            "cannelloni": "Cylinders of pasta stuffed with a savory filling.",
+            "bronchitis": "Inflammation of the mucous membrane in the bronchial tubes.",
+            "diphtheria": "An acute, highly contagious bacterial disease.",
+            "corbels": "A projection jutting from a wall to support a structure above.",
+            "Kilimanjaro": "The highest mountain in Africa.",
+            "protégé": "A person guided and supported by a more experienced person.",
+            "maquisards": "Members of the French Resistance during World War II.",
+            "Charolais": "A breed of large white beef cattle.",
+            "chair": "A separate seat for one person.",
+            "brass": "A yellow alloy of copper and zinc.",
+            "ready": "In a suitable state for an action or situation.",
+            "hangdog": "Having a dejected or guilty appearance.",
+            "padlock": "A detachable lock.",
+            "scatter": "Throw in various random directions.",
+            "gobble": "Eat something hurriedly and noisily.",
+            "eel": "A snake-like fish.",
+            "sizzle": "Make a hissing sound.",
+            "Spanish": "Relating to Spain, its people, or its language.",
+            "hornet": "A large social wasp.",
+            "oval": "Having a rounded and slightly elongated outline like an egg.",
+            "plastic": "A synthetic material made from organic polymers.",
+            "mason": "A person skilled in cutting and laying stone.",
+            "slander": "Making a false spoken statement damaging a reputation.",
+            "evergreen": "A plant that retains green leaves throughout the year.",
+            "decompose": "Make or become rotten.",
+            "reasons": "Causes or justifications for an action.",
+            "dismantle": "Take to pieces.",
+            "glance": "Take a brief or hurried look.",
+            "oath": "A solemn promise.",
+            "sneakers": "A soft shoe worn for sports or casual occasions.",
+            "duets": "Musical compositions for two performers.",
+            "cursive": "Written with the characters joined together.",
+            "pastel": "A soft and delicate shade of a color.",
+            "hype": "Extravagant publicity.",
+            "nestled": "Settle or lie comfortably within something.",
+            "mustiness": "The state of smelling or tasting stale or moldy.",
+            "shrouded": "Covered so as to conceal from view.",
+            "moderate": "Average in amount or quality.",
+            "mouthpiece": "Part of an instrument or telephone placed near the mouth.",
+            "lantern": "A lamp with a transparent case.",
+            "author": "A writer of a book or report.",
+            "wily": "Skilled at gaining an advantage deceitfully.",
+            "veil": "A piece of fine material worn to conceal the face.",
+            "redress": "Remedy or set right.",
+            "cruiser": "A large fast warship.",
+            "vitally": "In a way that is absolutely necessary.",
+            "burrowed": "Made a hole or tunnel to use as a dwelling.",
+            "pentagon": "A plane figure with five straight sides.",
+            "diagram": "A simplified drawing showing workings or structure.",
+            "scrimmage": "An informal game or practice session.",
+            "vulgar": "Lacking sophistication or good taste.",
+            "resign": "Voluntarily leave a job.",
+            "corrupt": "Willingness to act dishonestly for personal gain.",
+            "potency": "The power of something to influence.",
+            "quartz": "A hard mineral consisting of silicon dioxide.",
+            "tournament": "A series of contests between competitors.",
+            "agribusiness": "Agriculture conducted on commercial principles.",
+            "clementine": "A small citrus fruit.",
+            "signature": "A person's name written in a distinctive way.",
+            "influence": "Capacity to have an effect on character or behavior.",
+            "snorkeling": "Swimming using a diving mask and breathing tube.",
+            "citadel": "A fortress protecting or dominating a city.",
+            "achievements": "Things done successfully by effort or skill.",
+            "appliances": "Equipment designed to perform a specific task.",
+            "invective": "Insulting or abusive language.",
+            "badminton": "A game with rackets and a shuttlecock.",
+            "gardenia": "A shrub with large fragrant white or yellow flowers.",
+            "electorate": "All the people entitled to vote in an election.",
+            "absorption": "The process by which one thing absorbs another.",
+            "prognosticate": "Foretell or prophesy.",
+            "Pacific": "The world's largest and deepest ocean.",
+            "affiliation": "The state of being affiliated with an organization.",
+            "synopsis": "A brief summary or general survey.",
+            "coriander": "An aromatic plant used as a culinary herb.",
+            "purgatory": "A place of suffering for the expiation of sins.",
+            "torpor": "A state of physical or mental inactivity.",
+            "covetous": "Showing a great desire to possess something belonging to others.",
+            "oppression": "Prolonged cruel or unjust treatment.",
+            "abysmal": "Extremely bad.",
+            "precipice": "A very steep rock face or cliff.",
+            "purview": "The scope of influence or concerns.",
+            "suburbia": "The suburbs or their inhabitants.",
+            "construe": "Interpret in a particular way.",
+            "fettle": "Condition or state of health.",
+            "curriculum": "Subjects comprising a course of study.",
+            "deuce": "A score of 40-all in tennis.",
+            "berth": "A fixed bunk on a ship or train.",
+            "cyst": "A membranous sac in the body containing fluid.",
+            "knavery": "Dishonest or unscrupulous behavior.",
+            "synonym": "A word with the same meaning as another.",
+            "purloined": "Stolen.",
+            "delectation": "Pleasure and delight.",
+            "austerity": "Sternness or severity of manner.",
+            "nascent": "Just coming into existence.",
+            "extremophile": "A microorganism that lives in extreme conditions.",
+            "monolithic": "Formed of a single large block of stone.",
+            "coven": "A gathering of witches.",
+            "satisfice": "Accept an available option as satisfactory.",
+            "nuptials": "A wedding.",
+            "aquacade": "A spectacle of swimming and diving.",
+            "assuage": "Make an unpleasant feeling less intense.",
+            "ballistics": "The science of projectiles and firearms.",
+            "efficacy": "Ability to produce a desired result.",
+            "dreidel": "A small four-sided spinning top.",
+            "alacrity": "Brisk and cheerful readiness.",
+            "elision": "Omission of a sound or syllable in speech.",
+            "sanctimonious": "Making a show of being morally superior.",
+            "heptathlon": "A track and field contest with seven events.",
+            "tempera": "A method of painting with pigments in emulsion.",
+            "mitosis": "A type of cell division.",
+            "apologia": "A formal written defense of one's conduct.",
+            "mesomorph": "A person with a muscular body build.",
+            "claustrophobia": "Fear of confined places.",
+            "glissade": "A way of sliding down a steep slope of ice or snow.",
+            "antebellum": "Existing before a particular war.",
+            "weir": "A low dam built across a river.",
+            "sortie": "An attack made by troops coming out from a besieged place.",
+            "compañero": "A companion or associate.",
+            "pelota": "A Basque game played in a walled court.",
+            "eloge": "A speech in praise of a person.",
+            "mansard": "A roof with four sloping sides.",
+            "ramate": "Having branches.",
+            "paranephric": "Beside or near the kidney.",
+            "tontine": "An annuity shared by subscribers to a common fund.",
+            "asyllabia": "Inability to form syllables from letters.",
+            "velodrome": "An arena for track cycling.",
+            "dysplasia": "Enlargement of an organ by proliferation of abnormal cells.",
+            "Columbiad": "A form of 19th-century cast-iron cannon designed to fire heavy shot.",
+            "terricolous": "Living on or in the ground.",
+            "soporiferous": "Tending to induce sleep.",
+            "cyclopean": "Relating to or resembling a Cyclops.",
+            "messianic": "Relating to the Messiah.",
+            "Austronesia": "Islands of the Pacific and Indian oceans.",
+            "maxillary": "Of or attached to the jaw.",
+            "Euclidean": "Relating to the Greek mathematician Euclid or his system of geometry.",
+            "archizoic": "Relating to the earliest life on earth.",
+            "aphagia": "Inability or refusal to swallow.",
+            "persillade": "A sauce of parsley and garlic.",
+            "capriccio": "A lively piece of music.",
+            "chitin": "Fibrous substance forming an arthropod exoskeleton.",
+            "maisonette": "A separate residence within a larger house.",
+            "maunaloa": "A large shield volcano in Hawaii; also a vine with pink flowers.",
+            "hexastich": "A stanza or poem of six lines.",
+            "bathypelagic": "Inhabiting the deep sea.",
+            "syzygy": "Straight-line configuration of three celestial bodies.",
+            "pharisaical": "Practicing strict observance of external religious forms.",
+            "vicegerent": "A person appointed to act as an administrative deputy.",
+            "pince-nez": "Eyeglasses with a nose clip.",
+            "carotid": "Artery carrying blood to the head and neck.",
+            "salaam": "A common greeting in Arabic-speaking countries.",
+            "forzato": "With force.",
+            "covey": "A small flock of birds.",
+            "apartheid": "A system of segregation or discrimination.",
+            "kibbutz": "A communal settlement in Israel.",
+            "putti": "Representations of a naked child in Renaissance art.",
+            "beignet": "A deep-fried pastry.",
+            "fricassee": "Meat stewed in a thick white sauce.",
+            "abecedarius": "An alphabetic acrostic poem.",
+            "collunarium": "A nasal douche or wash.",
+            "scamillus": "A block under a column to prevent the appearance of sinking.",
+            "buccinator": "A muscle forming the wall of the cheek.",
+            "Tijuana": "A city in Mexico, on the border with the US.",
+            "silenus": "In Greek mythology, a companion of Dionysus.",
+            "marcottage": "Air layering to propagate plants.",
+            "schuss": "A straight downhill run on skis.",
+            "bodegon": "A painting of a kitchen or tavern scene.",
+            "cri de coeur": "A passionate appeal, complaint, or protest.",
+            "chaise longue": "A low chair with a seat long enough to support the legs.",
+            "tathagata": "A title of the Buddha.",
+            "phalanstery": "A communal building for a utopian community.",
+            "diapir": "Intrusion forced into overlying rocks.",
+            "harmattan": "A dry, dusty easterly wind in West Africa.",
+            "farinha": "A coarse flour made from cassava or corn.",
+            "shamiana": "A ceremonial tent, canopy, or marquee used for functions in India.",
+            "chautauqua": "An adult education movement in the US.",
+            "heishi": "Small disc-shaped beads made of shells or stones.",
+            "mostaccioli": "A tube-shaped pasta.",
+            "baetyl": "A sacred stone worshipped as a divine dwelling.",
+            "gardai": "The police force of the Republic of Ireland.",
+            "gelinotte": "A hazel grouse.",
+            "zamacueca": "An ancient colonial dance from Peru.",
+            "geländesprung": "A jump in skiing from a crouching position.",
+            "sittringee": "A kind of striped cotton carpet from India."
+        };
+
+        const listContainer = document.getElementById('list');
+        const words = Object.keys(dictionary);
+        
+        // Load saved progress from LocalStorage
+        const progress = JSON.parse(localStorage.getItem('spellingBeeProgress')) || {};
+
+        words.forEach((word, index) => {
+            const row = document.createElement('div');
+            row.className = 'word-row';
+            if (progress[word]) row.classList.add('completed');
+
+            // 1. Checkbox
+            const check = document.createElement('input');
+            check.type = 'checkbox';
+            check.className = 'check-box';
+            check.checked = !!progress[word];
+            check.onchange = (e) => {
+                if (e.target.checked) {
+                    row.classList.add('completed');
+                    progress[word] = true;
+                } else {
+                    row.classList.remove('completed');
+                    delete progress[word];
+                }
+                localStorage.setItem('spellingBeeProgress', JSON.stringify(progress));
+            };
+
+            // 2. Speaker Icon
+            const audioBtn = document.createElement('button');
+            audioBtn.className = 'icon-btn audio-icon';
+            audioBtn.innerHTML = '🔊';
+            audioBtn.onclick = () => {
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.rate = 0.8;
+                window.speechSynthesis.speak(utterance);
+            };
+
+            // 3. Number
+            const numSpan = document.createElement('span');
+            numSpan.className = 'num';
+            numSpan.innerText = index + 1;
+
+            // 4. Word
+            const wordSpan = document.createElement('span');
+            wordSpan.className = 'word-text';
+            wordSpan.innerText = word;
+
+            // 5. Meaning
+            const defBtn = document.createElement('button');
+            defBtn.className = 'icon-btn def-icon';
+            defBtn.innerHTML = '📖';
+            defBtn.onclick = () => {
+                alert(`"${word.toUpperCase()}"\n\nDefinition: ${dictionary[word]}`);
+            };
+
+            row.appendChild(check);
+            row.appendChild(audioBtn);
+            row.appendChild(numSpan);
+            row.appendChild(wordSpan);
+            row.appendChild(defBtn);
+
+            listContainer.appendChild(row);
+        });
+    </script>
+</body>
+</html>
