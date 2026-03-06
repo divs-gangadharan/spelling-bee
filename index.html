@@ -2,65 +2,69 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Master Spelling Tracker 2026</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Spelling Tracker 2026</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; color: #333; line-height: 1.6; }
-        .container { max-width: 1100px; margin: 20px auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .toolbar { position: sticky; top: 0; background: #fff; padding: 15px 0; border-bottom: 2px solid #eee; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; z-index: 1000; }
-        .search-box { padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 250px; }
-        .word-list { margin-top: 20px; }
-        .word-row { display: grid; grid-template-columns: 40px 50px 140px 1fr 100px; gap: 10px; align-items: center; padding: 10px; border-bottom: 1px solid #eee; transition: background 0.2s; }
-        .word-row:hover { background: #f9f9f9; }
+        body { font-family: sans-serif; background: #f4f7f6; margin: 0; padding: 5px; }
+        .container { max-width: 480px; margin: auto; background: #fff; padding: 10px; border-radius: 8px; }
+        h2 { font-size: 1.1em; text-align: center; margin: 10px 0; }
+        .toolbar { position: sticky; top: 0; background: #fff; padding: 10px 0; border-bottom: 2px solid #eee; display: flex; flex-wrap: wrap; gap: 5px; justify-content: space-between; z-index: 1000; }
+        .search-box { flex-grow: 1; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        .word-row { display: flex; align-items: center; padding: 6px 2px; border-bottom: 1px solid #eee; font-size: 15px; gap: 6px; }
         .word-row.completed { background: #e8f5e9; color: #888; }
-        .word-row.hidden { display: none; }
-        .btn { padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; transition: opacity 0.2s; }
+        .col-num { width: 30px; font-size: 11px; color: #999; flex-shrink: 0; text-align: right; }
+        .col-check { width: 22px; flex-shrink: 0; }
+        .col-audio { width: 28px; flex-shrink: 0; }
+        .col-word { flex-grow: 1; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .col-actions { display: flex; gap: 4px; flex-shrink: 0; align-items: center; }
+        .btn { border: none; border-radius: 4px; cursor: pointer; padding: 4px; font-size: 15px; line-height: 1; }
         .btn-audio { background: #3498db; color: white; }
         .btn-info { background: #2ecc71; color: white; }
-        .btn-toggle { background: #95a5a6; color: white; }
-        #stats { font-weight: bold; margin-left: auto; color: #2c3e50; }
-        .yg-link { color: #e74c3c; font-size: 0.8em; font-weight: bold; text-decoration: none; border: 1px solid #e74c3c; padding: 2px 5px; border-radius: 3px; display: none; margin-left: 5px; }
+        .btn-filter { background: #95a5a6; color: white; padding: 4px 8px; font-size: 12px; }
+        .yg-link { color: #e74c3c; font-size: 10px; text-decoration: none; border: 1px solid #e74c3c; padding: 1px 3px; border-radius: 3px; display: none; font-weight: bold; }
         .yg-link.active { display: inline-block; }
+        #stats { font-size: 12px; width: 100%; text-align: center; margin-top: 5px; color: #555; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Spelling Bee 2026: Master Competition Tracker</h2>
-    
+    <h2>Spelling Tracker 2026</h2>
     <div class="toolbar">
-        <input type="text" id="searchBar" class="search-box" placeholder="Search for a word..." onkeyup="filterWords()">
-        <button class="btn" onclick="setView('all')">All</button>
-        <button class="btn" onclick="setView('todo')">To Study</button>
-        <button class="btn btn-toggle" id="bulkToggle" onclick="toggleAll()">Check All</button>
+        <input type="text" id="searchBar" class="search-box" placeholder="Search..." onkeyup="renderWords()">
+        <button class="btn btn-filter" onclick="setView('all')">All</button>
+        <button class="btn btn-filter" onclick="setView('todo')">Study</button>
+        <button class="btn btn-filter" id="bulkToggle" onclick="toggleAll()">Check All</button>
         <div id="stats">Mastered: 0 / 700</div>
     </div>
-
-    <div id="wordContainer" class="word-list"></div>
+    <div id="wordContainer"></div>
 </div>
 
 <script>
-    const MW_KEY = '8b910335-9b45-48f4-a845-e4df6d81b05b';
+    const MW_KEY = '8b910335-9b45-48f4-a845-e4df6d81b05b'; 
     let currentFilter = 'all';
 
-    // Enhanced Dictionary with Competition Words
-    const wordRef = {
-        "columbiad": { pos: "noun", def: "An obsolete heavy long-chambered muzzle-loading gun." },
-        "compañero": { pos: "noun", def: "A companion or buddy." },
-        "eloge": { pos: "noun", def: "A panegyrical funeral oration; a tribute." },
-        "asyllabia": { pos: "noun", def: "Aphasia in which one can recognize letters but cannot form syllables." },
-        "pelota": { pos: "noun", def: "A court game related to jai alai; or the ball used in it." },
-        "syzygy": { pos: "noun", def: "Nearly straight-line configuration of three celestial bodies in a gravitational system." },
-        "geländesprung": { pos: "noun", def: "A jump in skiing made from a low crouch with the aid of both poles." },
-        "tontine": { pos: "noun", def: "A financial arrangement where survivors share a prize or dividends." },
-        "soporiferous": { pos: "adjective", def: "Tending to induce sleep." },
-        "archizoic": { pos: "adjective", def: "Of or relating to the earliest forms of life." },
-        "persillade": { pos: "adjective", def: "Dressed with or containing parsley." },
-        "bodegon": { pos: "noun", def: "A Spanish genre or still-life painting." },
-        "tathagata": { pos: "noun", def: "An enlightened one; a finder of truth (Buddhism)." },
-        "farinha": { pos: "noun", def: "Cassava meal or flour." },
-        "gardai": { pos: "noun plural", def: "Police officers in the Republic of Ireland." },
-        "zamacueca": { pos: "noun", def: "A traditional dance of Chile, Bolivia, and Peru." },
-        "spectators": { pos: "noun plural", def: "People who watch a show, game, or other event." }
+    // Comprehensive Dictionary for specialized Bee words
+    const localDict = {
+        "chautauqua": { pos: "noun", def: "An adult education movement in the US, highly popular in the late 19th and early 20th centuries." },
+        "heishi": { pos: "noun", def: "Tiny, polished disks or beads made from shells or semiprecious stones." },
+        "mostaccioli": { pos: "noun", def: "A type of penne pasta that resembles a small mustache." },
+        "baetyl": { pos: "noun", def: "A sacred stone, often of meteoric origin, believed to be the dwelling place of a deity." },
+        "gardai": { pos: "noun", def: "Members of the national police force of the Republic of Ireland." },
+        "gelinotte": { pos: "noun", def: "A European woodland grouse, specifically the hazel grouse." },
+        "zamacueca": { pos: "noun", def: "A traditional South American dance, popular in Chile and Peru." },
+        "geländesprung": { pos: "noun", def: "A jump in downhill skiing, usually over an obstacle, performed without the aid of a jump ramp." },
+        "sittringee": { pos: "noun", def: "A multicolored cotton carpet or rug made in India." },
+        "compañero": { pos: "noun", def: "A companion, comrade, or partner." },
+        "maquisards": { pos: "noun", def: "Members of the French Resistance during WWII." },
+        "señor": { pos: "noun", def: "A Spanish title or form of address for a man." },
+        "monsieur": { pos: "noun", def: "A French title or form of address for a man." },
+        "et cetera": { pos: "adverb", def: "And others of the same kind; and so forth." },
+        "charolais": { pos: "noun", def: "A breed of large white beef cattle originally from France." },
+        "maître d'": { pos: "noun", def: "The headwaiter or manager of a restaurant dining room." },
+        "au revoir": { pos: "interjection", def: "Goodbye; until we meet again." },
+        "cri de coeur": { pos: "noun", def: "A passionate appeal or complaint (French for 'cry from the heart')." },
+        "bathypelagic": { pos: "adjective", def: "Relating to the ocean depths between 1,000 and 4,000 meters." }
     };
 
     const schoolList = ["send", "stuck", "fish", "mind", "scrub", "brown", "tint", "yawn", "want", "pond", "sharks", "twigs", "comfy", "tight", "scrunch", "close", "wire", "giant", "chance", "tender", "melon", "parent", "hockey", "insects", "shortcut", "lure", "forest", "spinning", "sizzling", "search", "mango", "jangle", "blossoms", "studded", "distress", "moment", "basil", "satin", "signal", "shuffle", "minnows", "before", "writing", "sugar", "seep", "wheels", "fruit", "goats", "limbs", "señor", "faraway", "pirates", "wooden", "breakfast", "acrobat", "chocolate", "elephant", "recipe", "surprise", "bombarded", "incredible", "countess", "peppercorn", "raise", "zooming", "turnout", "streetlights", "courtyard", "asleep", "dinosaur", "vacuum", "monsoon", "avocado", "February", "especially", "scorcher", "fragments", "unleash", "cosmetics", "frustration", "mascot", "mustache", "perfume", "tuxedo", "lurches", "prognosis", "sequins", "fabulous", "fluently", "brandished", "anguish", "rickety", "pediatric", "democracy", "beige", "grimace", "enormous", "nautical", "ebony", "paltry", "garbled", "imitation", "receptionist", "plausible", "commotion", "immigrants", "spectators", "suspicious", "ramshackle", "heron", "nomad", "skewer", "lunacy", "bracken", "neon", "hypnosis", "gusto", "gleaned", "winsome", "galore", "atrium", "savant", "hippies", "campaign", "mosque", "warlock", "convulsively", "garishly", "Everest", "cavorting", "conscience", "deferential", "khaki", "asphalt", "talcum", "equestrian", "monsieur", "prestigious", "guttural", "courier", "psyche", "Frankenstein", "et cetera", "delphine", "archipelago", "puissance", "chignon", "galleon", "chartreuse", "Nehru", "swaggering", "riveted", "dirge", "whittled", "fiberglass", "fissures", "discipline", "scurrying", "pizzeria", "skittish", "nomination", "dictatorship", "sporadic", "repugnant", "renowned", "laborious", "foreseeable", "scalpel", "compassionate", "alfalfa", "crematorium", "amicable", "beautician", "assignment", "whinnying", "memoirs", "ominous", "syndrome", "safari", "substantially", "formidable", "marquee", "compunction", "hyperventilated", "onslaught", "misanthrope", "cravenly", "hypocritical", "traumatic", "solemnly", "ensemble", "contentious", "lye", "lacrosse", "cajolery", "residuals", "peroxide", "apocalypse", "barricade", "anonymously", "barrette", "junket", "Erie", "silhouette", "thesaurus", "chandelier", "concierge", "hibiscus", "maracas", "burpees", "piccolo", "tulle", "camphor", "paparazzi", "pogrom", "pâtisserie", "sarsaparilla", "cannelloni", "bronchitis", "diphtheria", "corbels", "Kilimanjaro", "protégé", "maquisards", "Charolais", "chair", "brass", "ready", "hangdog", "padlock", "scatter", "gobble", "eel", "sizzle", "Spanish", "hornet", "oval", "plastic", "mason", "slander", "evergreen", "decompose", "reasons", "dismantle", "glance", "oath", "sneakers", "duets", "cursive", "pastel", "hype", "nestled", "mustiness", "shrouded", "moderate", "mouthpiece", "lantern", "author", "wily", "veil", "redress", "cruiser", "vitally", "burrowed", "pentagon", "diagram", "scrimmage", "vulgar", "resign", "corrupt", "potency", "quartz", "tournament", "agribusiness", "clementine", "signature", "influence", "snorkeling", "citadel", "achievements", "appliances", "invective", "badminton", "gardenia", "electorate", "absorption", "prognosticate", "Pacific", "affiliation", "synopsis", "coriander", "purgatory", "torpor", "covetous", "oppression", "abysmal", "precipice", "purview", "suburbia", "construe", "fettle", "curriculum", "deuce", "berth", "cyst", "knavery", "synonym", "purloined", "delectation", "austerity", "nascent", "extremophile", "monolithic", "coven", "satisfice", "nuptials", "aquacade", "assuage", "ballistics", "efficacy", "dreidel", "alacrity", "elision", "sanctimonious", "heptathlon", "tempera", "mitosis", "apologia", "mesomorph", "claustrophobia", "glissade", "antebellum", "weir", "sortie", "compañero", "pelota", "eloge", "mansard", "ramate", "paranephric", "tontine", "asyllabia", "velodrome", "dysplasia", "terricolous", "soporiferous", "cyclopean", "Columbiad", "messianic", "Austronesia", "maxillary", "Euclidean", "archizoic", "aphagia", "persillade", "capriccio", "chitin", "maisonette", "maunaloa", "hexastich", "bathypelagic", "syzygy", "pharisaical", "vicegerent", "pince-nez", "carotid", "salaam", "forzato", "covey", "apartheid", "kibbutz", "putti", "beignet", "fricassee", "abecedarius", "collunarium", "scamillus", "buccinator", "Tijuana", "silenus", "marcottage", "schuss", "bodegon", "cri de coeur", "chaise longue", "tathagata", "phalanstery", "diapir", "harmattan", "farinha", "shamiana", "chautauqua", "heishi", "mostaccioli", "baetyl", "gardai", "gelinotte", "zamacueca", "geländesprung", "sittringee"];
@@ -74,66 +78,65 @@
         const searchTerm = document.getElementById('searchBar').value.toLowerCase();
         container.innerHTML = '';
         let count = 0;
-
         masterList.forEach((word, index) => {
             const isDone = mastered[word] || false;
             if (isDone) count++;
-            
-            // Filters
-            const matchesSearch = word.toLowerCase().includes(searchTerm);
-            const matchesTab = currentFilter === 'all' || (currentFilter === 'todo' && !isDone);
-
-            if (matchesSearch && matchesTab) {
-                const row = document.createElement('div');
-                row.className = `word-row ${isDone ? 'completed' : ''}`;
-                row.innerHTML = `
-                    <input type="checkbox" ${isDone ? 'checked' : ''} onchange="toggleMastery('${word}')">
-                    <span>${index + 1}</span>
-                    <button class="btn btn-audio" onclick="playAudio('${word}', ${index})">🔊 Audio</button>
-                    <strong class="word-text">${word}</strong>
-                    <div style="display:flex; align-items:center;">
-                        <button class="btn btn-info" onclick="showInfo('${word}')">📖 Info</button>
-                        <a id="yg-${index}" href="https://youglish.com/pronounce/${word}/english" target="_blank" class="yg-link">YouGlish</a>
-                    </div>
-                `;
-                container.appendChild(row);
-            }
+            if (currentFilter === 'todo' && isDone) return;
+            if (searchTerm && !word.toLowerCase().includes(searchTerm)) return;
+            const row = document.createElement('div');
+            row.className = `word-row ${isDone ? 'completed' : ''}`;
+            row.innerHTML = `<div class="col-num">${index + 1}</div><div class="col-check"><input type="checkbox" ${isDone ? 'checked' : ''} onchange="toggleMastery('${word}')"></div><div class="col-audio"><button class="btn btn-audio" onclick="playMW('${word}', ${index})">🔊</button></div><div class="col-word">${word}</div><div class="col-actions"><button class="btn btn-info" onclick="showInfo('${word}')">📖</button><a id="yg-${index}" href="https://youglish.com/pronounce/${word}/english" target="_blank" class="yg-link">YG</a></div>`;
+            container.appendChild(row);
         });
         document.getElementById('stats').innerText = `Mastered: ${count} / ${masterList.length}`;
         localStorage.setItem('studyProgress', JSON.stringify(mastered));
     }
 
-    async function showInfo(word) {
-        let definition = "Fetching...";
-        let pos = "noun";
-
-        if (wordRef[word.toLowerCase()]) {
-            definition = wordRef[word.toLowerCase()].def;
-            pos = wordRef[word.toLowerCase()].pos;
-        } else {
-            try {
-                const res = await fetch(`https://www.dictionaryapi.com/api/v3/references/collegiate/json/${word}?key=${MW_KEY}`);
-                const data = await res.json();
-                definition = data[0].shortdef[0];
-                pos = data[0].fl;
-            } catch (e) { definition = "Offline definition not found."; }
-        }
-        alert(`WORD: ${word.toUpperCase()}\nPOS: ${pos}\nDEF: ${definition}`);
-    }
-
-    async function playAudio(word, index) {
+    async function playMW(word, index) {
         try {
             const res = await fetch(`https://www.dictionaryapi.com/api/v3/references/collegiate/json/${word}?key=${MW_KEY}`);
             const data = await res.json();
-            const audio = data[0].hwi.prs[0].sound.audio;
-            const sub = audio.startsWith('bix') ? 'bix' : audio.startsWith('gg') ? 'gg' : audio[0];
-            new Audio(`https://media.merriam-webster.com/audio/prons/en/us/mp3/${sub}/${audio}.mp3`).play();
+            if (data?.[0]?.hwi?.prs?.[0]?.sound) {
+                const audio = data[0].hwi.prs[0].sound.audio;
+                const sub = audio.startsWith('bix') ? 'bix' : audio.startsWith('gg') ? 'gg' : /^[0-9_]/.test(audio) ? 'number' : audio[0];
+                new Audio(`https://media.merriam-webster.com/audio/prons/en/us/mp3/${sub}/${audio}.mp3`).play();
+            } else throw new Error();
         } catch (e) {
             window.speechSynthesis.speak(new SpeechSynthesisUtterance(word));
-            document.getElementById(`yg-${index}`).classList.add('active');
+            const yg = document.getElementById(`yg-${index}`);
+            if(yg) yg.classList.add('active');
         }
     }
 
+    async function showInfo(word) {
+        const cleanWord = word.toLowerCase().trim();
+        let pos = "noun", def = "";
+
+        // 1. Check Local Dictionary Fallback first for specialized Bee terms
+        if (localDict[cleanWord]) {
+            pos = localDict[cleanWord].pos;
+            def = localDict[cleanWord].def;
+        } else {
+            // 2. Fetch from Merriam-Webster
+            try {
+                const res = await fetch(`https://www.dictionaryapi.com/api/v3/references/collegiate/json/${word}?key=${MW_KEY}`);
+                const data = await res.json();
+                if (data && data[0] && typeof data[0] === 'object') {
+                    def = data[0].shortdef ? data[0].shortdef[0] : "Check online for full details.";
+                    pos = data[0].fl || "part of speech unknown";
+                } else {
+                    def = "Specialized spelling bee term. Please search for context.";
+                    pos = "varies";
+                }
+            } catch (e) { 
+                def = "API error. Check manually.";
+            }
+        }
+        alert(`WORD: ${word.toUpperCase()}\nTYPE: ${pos}\nDEF: ${def}`);
+    }
+
+    function toggleMastery(word) { mastered[word] = !mastered[word]; renderWords(); }
+    function setView(v) { currentFilter = v; renderWords(); }
     function toggleAll() {
         const btn = document.getElementById('bulkToggle');
         const shouldCheck = btn.innerText === "Check All";
@@ -141,11 +144,6 @@
         btn.innerText = shouldCheck ? "Uncheck All" : "Check All";
         renderWords();
     }
-
-    function toggleMastery(word) { mastered[word] = !mastered[word]; renderWords(); }
-    function setView(v) { currentFilter = v; renderWords(); }
-    function filterWords() { renderWords(); }
-
     renderWords();
 </script>
 </body>
